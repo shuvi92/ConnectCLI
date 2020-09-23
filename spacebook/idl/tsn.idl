@@ -1,0 +1,70 @@
+module TSN 
+{
+    typedef unsigned long serial_number;
+    const unsigned long UUID_SIZE=37; // 36 characters + C style NULL
+    
+    // Personal information of the user. Published on startup.
+    struct user_information 
+    {
+        char uuid[UUID_SIZE];                  // 36 characters + C style NULL
+        string<70> first_name;
+        string<70> last_name;
+        long date_of_birth;             // Date of birth of user, seconds elapsed
+                                        // since time began (jan 1,1970 origin)
+
+        sequence<string> interests;     
+        unsigned long long number_of_highest_post;
+    };
+    #pragma keylist user_information uuid
+    #pragma cats user_information uuid
+
+
+    struct node_request 
+    {
+        char fulfiller_uuid[UUID_SIZE];  // the owner of the posts
+        sequence<serial_number> requested_posts;
+    };
+
+
+    struct request 
+    {
+        char uuid[UUID_SIZE];  //  the uuid of the node making the request
+        sequence<node_request> user_requests;
+    };
+    #pragma keylist request uuid
+    #pragma cats request uuid
+    
+    
+    struct post_data
+    {
+        char owner_uuid[UUID_SIZE];
+        serial_number post_id;
+    };
+
+
+    struct response 
+    {
+        char uuid[UUID_SIZE];                       // uuid owner
+        serial_number post_id;
+        string post_body;
+        long date_of_creation;              // When post was made in seconds since 1/1/1970
+        
+        post_data parent_post;              // Structure holding UUID and serial of the parent post, if applicable
+        sequence<post_data> child_posts;            // Sequence of structures holding children UUID and correspond 
+                                                    // serials, if applicable
+    };
+    #pragma keylist response uuid
+    #pragma cats response uuid
+    
+
+    struct private_message
+    {
+        char receiver_uuid[UUID_SIZE];  // UUID of the message receiving node
+        char sender_uuid[UUID_SIZE];    // To know who sent the message
+        string message_body;
+        long date_of_creation;          // When message was made in seconds since 1/1/1970
+    };
+    #pragma keylist private_message receiver_uuid
+    #pragma cats private_message receiver_uuid
+
+};
